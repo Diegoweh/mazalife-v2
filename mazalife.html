@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mazalife — Tourism & Entertainment · Mazatlán</title>
+<meta name="description" content="Vive Mazatlán como nunca. Tirolesa del Faro, Beach Club, Observatorio histórico, Museo Ballena y más. Reserva tu experiencia en línea.">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --azul:       #1E6DB5;
+  --azul-dark:  #154F87;
+  --azul-light: #E8F2FC;
+  --naranja:    #F5A623;
+  --naranja-dark:#D4880A;
+  --verde:      #4CAF50;
+  --rosa:       #E91E8C;
+  --teal:       #00BCD4;
+  --crema:      #FAFAF7;
+  --arena:      #F5F0E8;
+  --gris:       #6B7280;
+  --gris-light: #F3F4F6;
+  --negro:      #111827;
+  --blanco:     #FFFFFF;
+
+  /* Venue colors */
+  --shekinah-color:    #00BCD4;
+  --farolesa-color:    #4CAF50;
+  --observatorio-color:#F5A623;
+  --munba-color:       #1E6DB5;
+  --mansion-color:     #E91E8C;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Barlow Condensed', sans-serif;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.10);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.14);
+  --shadow-xl: 0 32px 80px rgba(0,0,0,0.18);
+
+  --radius: 16px;
+  --radius-sm: 8px;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--crema);
+  color: var(--negro);
+  overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: var(--font-body); border: none; }
+
+/* ═══════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════ */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  transition: box-shadow 0.3s;
+}
+.navbar.scrolled { box-shadow: var(--shadow-md); }
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-mark {
+  width: 40px; height: 40px;
+  background: var(--azul);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 18px; font-weight: 800;
+  color: white; letter-spacing: -1px;
+}
+.nav-logo-text {
+  font-family: var(--font-heading);
+  font-size: 22px; font-weight: 800; letter-spacing: 1px;
+}
+.nav-logo-text span:first-child { color: var(--azul); }
+.nav-logo-text span:last-child  { color: var(--naranja); }
+
+.nav-links {
+  display: flex; gap: 32px; list-style: none;
+}
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--gris);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--azul); }
+
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn-carrito {
+  position: relative;
+  background: var(--azul);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-carrito:hover { background: var(--azul-dark); transform: translateY(-1px); }
+.cart-badge {
+  background: var(--naranja);
+  color: white; border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  display: none;
+}
+.cart-badge.show { display: flex; }
+
+.btn-wa-nav {
+  background: #25D366;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity 0.2s;
+}
+.btn-wa-nav:hover { opacity: 0.88; }
+
+@media(max-width:768px){
+  .nav-links { display: none; }
+  .navbar { padding: 0 20px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0D3D6B 0%, #1E6DB5 45%, #00BCD4 100%);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start;
+  padding: 100px 80px 80px;
+  position: relative; overflow: hidden;
+}
+
+/* Decorative circles */
+.hero::before {
+  content: '';
+  position: absolute; top: -120px; right: -120px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(245,166,35,0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: -80px; left: 30%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,188,212,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-tag {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white; border-radius: 50px;
+  padding: 6px 18px; font-size: 13px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 28px;
+  display: inline-block;
+  animation: fadeUp 0.8s ease both;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 900; line-height: 0.95;
+  color: white;
+  max-width: 700px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: italic; color: var(--naranja);
+  display: block;
+}
+
+.hero-sub {
+  font-size: 18px; color: rgba(255,255,255,0.8);
+  max-width: 480px; line-height: 1.65;
+  margin-bottom: 44px;
+  animation: fadeUp 0.8s 0.2s ease both;
+  font-weight: 300;
+}
+
+.hero-ctas {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.3s ease both;
+  margin-bottom: 80px;
+}
+
+.btn-primary {
+  background: var(--naranja);
+  color: white;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-size: 16px; font-weight: 700;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(245,166,35,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(245,166,35,0.5); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-size: 16px; font-weight: 600;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.25); }
+
+/* venue pills */
+.hero-venues {
+  position: absolute; bottom: 48px; left: 80px; right: 80px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  animation: fadeUp 0.8s 0.5s ease both;
+}
+.venue-pill {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white; border-radius: 50px;
+  padding: 8px 20px; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.venue-pill:hover { background: rgba(245,166,35,0.25); border-color: var(--naranja); color: var(--naranja); }
+.venue-pill::before { content: '→ '; opacity: 0.6; }
+
+@media(max-width:768px){
+  .hero { padding: 90px 24px 140px; }
+  .hero-venues { bottom: 24px; left: 24px; right: 24px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   STRIP — "5 EXPERIENCIAS QUE CAMBIAN TU VIAJE"
+═══════════════════════════════════════════════════════ */
+.strip {
+  background: var(--azul);
+  padding: 20px 40px;
+  display: flex; gap: 48px;
+  overflow-x: auto; white-space: nowrap;
+  scrollbar-width: none;
+}
+.strip::-webkit-scrollbar { display: none; }
+.strip-item {
+  color: rgba(255,255,255,0.75);
+  font-family: var(--font-heading);
+  font-size: 15px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; flex-shrink: 0;
+}
+.strip-item span { color: var(--naranja); margin-right: 8px; }
+
+/* ═══════════════════════════════════════════════════════
+   INTRO SECTION
+═══════════════════════════════════════════════════════ */
+.intro {
+  padding: 100px 80px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: center;
+  max-width: 1280px; margin: 0 auto;
+}
+.intro-label {
+  font-family: var(--font-heading);
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--azul); font-weight: 700; margin-bottom: 16px;
+}
+.intro h2 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 700; line-height: 1.1;
+  margin-bottom: 24px;
+}
+.intro h2 em { font-style: italic; color: var(--naranja); }
+.intro p { font-size: 17px; color: var(--gris); line-height: 1.75; margin-bottom: 16px; }
+
+.intro-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  margin-top: 8px;
+}
+.stat-box {
+  background: var(--arena);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.stat-num {
+  font-family: var(--font-heading);
+  font-size: 42px; font-weight: 800;
+  color: var(--azul); line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 13px; color: var(--gris); font-weight: 500; }
+
+.intro-visual {
+  position: relative;
+}
+.intro-img-main {
+  width: 100%; height: 480px;
+  background: linear-gradient(135deg, var(--azul) 0%, var(--teal) 100%);
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.intro-img-main .img-placeholder-text {
+  font-family: var(--font-display);
+  font-size: 28px; font-style: italic;
+  color: rgba(255,255,255,0.5);
+  text-align: center; padding: 24px;
+}
+.intro-img-float {
+  position: absolute;
+  bottom: -24px; left: -32px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 12px;
+}
+.float-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--naranja);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.float-text strong { display: block; font-size: 15px; color: var(--negro); }
+.float-text span { font-size: 12px; color: var(--gris); }
+
+@media(max-width:900px){
+  .intro { grid-template-columns: 1fr; padding: 60px 24px; gap: 48px; }
+  .intro-img-float { left: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION HEADER (reutilizable)
+═══════════════════════════════════════════════════════ */
+.section-header {
+  text-align: center;
+  padding: 80px 24px 0;
+  max-width: 700px; margin: 0 auto;
+}
+.section-header .label {
+  font-family: var(--font-heading);
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  font-weight: 700; margin-bottom: 14px;
+}
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700; line-height: 1.15;
+  margin-bottom: 16px;
+}
+.section-header p {
+  font-size: 17px; color: var(--gris);
+  line-height: 1.7; font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VENUE CARDS — story browsing
+═══════════════════════════════════════════════════════ */
+.venues-section {
+  padding: 60px 0 100px;
+}
+
+.venue-block {
+  max-width: 1280px; margin: 0 auto 80px;
+  padding: 0 40px;
+}
+.venue-block:last-child { margin-bottom: 0; }
+
+/* alternating layout */
+.venue-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center;
+  border-radius: 32px;
+  overflow: hidden;
+  background: white;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+.venue-inner:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+}
+.venue-block:nth-child(even) .venue-inner { direction: rtl; }
+.venue-block:nth-child(even) .venue-inner > * { direction: ltr; }
+
+.venue-img {
+  height: 520px;
+  display: flex; align-items: flex-end;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* venue color themes */
+.venue-shekinah    { background: linear-gradient(180deg, #006B7A 0%, #00BCD4 60%, #4EDFE8 100%); }
+.venue-farolesa    { background: linear-gradient(180deg, #1B5E20 0%, #4CAF50 60%, #81C784 100%); }
+.venue-observatorio{ background: linear-gradient(180deg, #E65100 0%, #F5A623 60%, #FFD54F 100%); }
+.venue-munba       { background: linear-gradient(180deg, #0D3D6B 0%, #1E6DB5 60%, #64B5F6 100%); }
+.venue-mansion     { background: linear-gradient(180deg, #880E4F 0%, #E91E8C 60%, #F48FB1 100%); }
+
+.venue-img-icon {
+  font-size: 120px; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  opacity: 0.15;
+  transition: transform 0.4s, opacity 0.4s;
+}
+.venue-inner:hover .venue-img-icon {
+  transform: translate(-50%,-50%) scale(1.1);
+  opacity: 0.22;
+}
+
+.venue-img-badge {
+  position: relative; z-index: 2;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  color: white; border-radius: 50px;
+  padding: 8px 18px; font-size: 13px; font-weight: 600;
+}
+
+.venue-content { padding: 56px 56px 56px 0; }
+.venue-block:nth-child(even) .venue-content { padding: 56px 0 56px 56px; }
+
+.venue-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 50px; padding: 6px 16px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.venue-name {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 700; line-height: 1.1;
+  margin-bottom: 16px;
+}
+.venue-desc {
+  font-size: 16px; color: var(--gris);
+  line-height: 1.75; margin-bottom: 28px;
+}
+
+.venue-highlights {
+  list-style: none; margin-bottom: 32px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.venue-highlights li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--negro); font-weight: 500;
+}
+.venue-highlights li::before {
+  content: '✓';
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+}
+
+/* per-venue bullet color */
+.venue-shekinah-wrap    .venue-highlights li::before { background: var(--shekinah-color); }
+.venue-farolesa-wrap    .venue-highlights li::before { background: var(--farolesa-color); }
+.venue-observatorio-wrap .venue-highlights li::before { background: var(--observatorio-color); }
+.venue-munba-wrap       .venue-highlights li::before { background: var(--munba-color); }
+.venue-mansion-wrap     .venue-highlights li::before { background: var(--mansion-color); }
+
+.venue-actions {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.venue-price {
+  font-family: var(--font-heading);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--gris);
+}
+.venue-price strong {
+  font-size: 28px; color: var(--negro);
+  display: block; line-height: 1;
+}
+.venue-price small { font-size: 11px; }
+.venue-price-nino {
+  font-size: 12px; color: var(--verde);
+  font-weight: 600; margin-top: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+.venue-price-nino::before {
+  content: '👦';
+  font-size: 11px;
+}
+
+.btn-add {
+  background: var(--naranja);
+  color: white; border-radius: 50px;
+  padding: 14px 28px; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 4px 16px rgba(245,166,35,0.35);
+}
+.btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,166,35,0.45); }
+.btn-add.added { background: var(--verde); box-shadow: 0 4px 16px rgba(76,175,80,0.35); }
+
+.btn-info {
+  color: var(--azul); font-size: 14px; font-weight: 600;
+  background: var(--azul-light); border-radius: 50px;
+  padding: 14px 22px;
+  transition: background 0.2s;
+}
+.btn-info:hover { background: #d0e8f7; }
+
+@media(max-width:900px){
+  .venue-inner { grid-template-columns: 1fr; direction: ltr !important; }
+  .venue-block:nth-child(even) .venue-inner { direction: ltr; }
+  .venue-img { height: 280px; }
+  .venue-content { padding: 32px !important; }
+  .venue-block { padding: 0 16px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PACK COMBO
+═══════════════════════════════════════════════════════ */
+.combos-section {
+  background: var(--arena);
+  padding: 100px 40px;
+}
+.combos-inner { max-width: 1280px; margin: 0 auto; }
+
+.combos-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  margin-top: 56px;
+}
+
+.combo-card {
+  background: white; border-radius: 24px;
+  padding: 36px 32px; position: relative;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+.combo-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.combo-card.featured { border: 2px solid var(--naranja); }
+.combo-featured-badge {
+  position: absolute; top: 20px; right: 20px;
+  background: var(--naranja); color: white;
+  border-radius: 50px; padding: 4px 14px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.combo-icon { font-size: 42px; margin-bottom: 20px; }
+.combo-name {
+  font-family: var(--font-heading);
+  font-size: 22px; font-weight: 800;
+  color: var(--negro); margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.combo-desc { font-size: 14px; color: var(--gris); line-height: 1.6; margin-bottom: 24px; }
+
+.combo-includes {
+  list-style: none; margin-bottom: 28px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.combo-includes li {
+  font-size: 13px; color: var(--negro); font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.combo-includes li span.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--azul); flex-shrink: 0; }
+
+.combo-price-row {
+  display: flex; align-items: flex-end; gap: 10px;
+  margin-bottom: 20px;
+}
+.combo-price-old {
+  font-size: 15px; color: var(--gris); text-decoration: line-through;
+}
+.combo-price-new {
+  font-family: var(--font-heading);
+  font-size: 36px; font-weight: 800; color: var(--azul); line-height: 1;
+}
+.combo-price-new small { font-size: 14px; font-weight: 600; color: var(--gris); }
+.combo-save {
+  background: #E8F8F0; color: var(--verde);
+  border-radius: 50px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700;
+}
+
+.btn-combo {
+  width: 100%; padding: 14px;
+  border-radius: 50px; font-size: 15px; font-weight: 700;
+  background: var(--azul); color: white;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-combo:hover { background: var(--azul-dark); transform: translateY(-1px); }
+.combo-card.featured .btn-combo { background: var(--naranja); }
+.combo-card.featured .btn-combo:hover { background: var(--naranja-dark); }
+
+@media(max-width:900px){
+  .combos-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SOCIAL PROOF / TESTIMONIOS
+═══════════════════════════════════════════════════════ */
+.testimonios-section {
+  padding: 100px 40px;
+  max-width: 1280px; margin: 0 auto;
+}
+.testimonios-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  margin-top: 56px;
+}
+.testimonio-card {
+  background: white; border-radius: 20px; padding: 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s;
+}
+.testimonio-card:hover { box-shadow: var(--shadow-md); }
+.testimonio-stars { color: var(--naranja); font-size: 18px; margin-bottom: 14px; }
+.testimonio-text { font-size: 15px; line-height: 1.75; color: var(--negro); margin-bottom: 20px; font-style: italic; }
+.testimonio-author { display: flex; align-items: center; gap: 12px; }
+.testimonio-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: white; flex-shrink: 0;
+}
+.testimonio-name { font-size: 14px; font-weight: 700; color: var(--negro); }
+.testimonio-city { font-size: 12px; color: var(--gris); }
+
+@media(max-width:900px){ .testimonios-grid { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════════════════
+   CTA FINAL — MAZATLÁN TE ESPERA
+═══════════════════════════════════════════════════════ */
+.cta-final {
+  background: linear-gradient(135deg, #0D3D6B 0%, #1E6DB5 50%, #00BCD4 100%);
+  padding: 120px 40px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-final::before {
+  content: '';
+  position: absolute; top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(245,166,35,0.2) 0%, transparent 60%);
+  border-radius: 50%; pointer-events: none;
+}
+.cta-final h2 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 72px);
+  color: white; font-weight: 900;
+  line-height: 1.05; margin-bottom: 20px;
+}
+.cta-final h2 em { color: var(--naranja); font-style: italic; }
+.cta-final p {
+  font-size: 18px; color: rgba(255,255,255,0.75);
+  max-width: 520px; margin: 0 auto 44px; line-height: 1.65;
+}
+.cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════ */
+.footer {
+  background: var(--negro); color: rgba(255,255,255,0.6);
+  padding: 64px 80px 32px;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  max-width: 1280px; margin: 0 auto 48px;
+}
+.footer-brand-name {
+  font-family: var(--font-heading);
+  font-size: 26px; font-weight: 800;
+  letter-spacing: 1px; margin-bottom: 12px;
+}
+.footer-brand-name span:first-child { color: var(--azul); }
+.footer-brand-name span:last-child  { color: var(--naranja); }
+.footer-brand-sub { font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; }
+.footer-brand-desc { font-size: 14px; line-height: 1.7; max-width: 280px; }
+.footer-col-title {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: white; font-weight: 700; margin-bottom: 18px;
+}
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-size: 14px; color: rgba(255,255,255,0.55); transition: color 0.2s; }
+.footer-links a:hover { color: var(--naranja); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 24px; max-width: 1280px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-bottom p { font-size: 13px; }
+.footer-bottom a { color: rgba(255,255,255,0.4); transition: color 0.2s; }
+.footer-bottom a:hover { color: var(--naranja); }
+
+@media(max-width:900px){
+  .footer { padding: 48px 24px 24px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARRITO LATERAL (drawer)
+═══════════════════════════════════════════════════════ */
+.cart-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 2000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(4px);
+}
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+
+.cart-drawer {
+  position: fixed; top: 0; right: -480px; bottom: 0;
+  width: 440px; max-width: 100%;
+  background: white; z-index: 2001;
+  display: flex; flex-direction: column;
+  box-shadow: -20px 0 60px rgba(0,0,0,0.2);
+  transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.cart-drawer.open { right: 0; }
+
+.cart-header {
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid var(--gris-light);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.cart-title {
+  font-family: var(--font-heading);
+  font-size: 22px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--negro);
+}
+.cart-close {
+  background: var(--gris-light); border-radius: 50%;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--gris); line-height: 1;
+  transition: background 0.2s;
+}
+.cart-close:hover { background: #E5E7EB; }
+
+.cart-body {
+  flex: 1; overflow-y: auto; padding: 20px 28px;
+}
+
+.cart-empty {
+  text-align: center; padding: 60px 20px;
+}
+.cart-empty-icon { font-size: 56px; margin-bottom: 16px; }
+.cart-empty h3 { font-size: 18px; font-weight: 700; color: var(--negro); margin-bottom: 8px; }
+.cart-empty p { font-size: 14px; color: var(--gris); }
+
+.cart-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0; border-bottom: 1px solid var(--gris-light);
+}
+.cart-item-color {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 15px; font-weight: 700; color: var(--negro); margin-bottom: 4px; }
+.cart-item-qty-row {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px;
+}
+.qty-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gris-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--negro);
+  transition: background 0.2s;
+}
+.qty-btn:hover { background: #E5E7EB; }
+.qty-num { font-size: 15px; font-weight: 700; min-width: 20px; text-align: center; }
+.cart-item-price {
+  font-family: var(--font-heading);
+  font-size: 18px; font-weight: 800; color: var(--azul);
+  flex-shrink: 0; padding-top: 2px;
+}
+.cart-item-remove {
+  background: none; color: var(--gris); font-size: 18px;
+  padding: 4px; line-height: 1; transition: color 0.2s;
+}
+.cart-item-remove:hover { color: var(--rojo, #EF4444); }
+
+.cart-footer {
+  padding: 20px 28px 28px;
+  border-top: 1px solid var(--gris-light);
+  flex-shrink: 0;
+}
+.cart-subtotal {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.cart-subtotal-label { font-size: 14px; color: var(--gris); }
+.cart-subtotal-val {
+  font-family: var(--font-heading);
+  font-size: 28px; font-weight: 800; color: var(--negro);
+}
+.cart-note { font-size: 12px; color: var(--gris); margin-bottom: 20px; }
+
+.btn-checkout {
+  width: 100%; padding: 18px;
+  background: var(--naranja); color: white;
+  border-radius: 50px; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(245,166,35,0.35);
+}
+.btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,166,35,0.45); }
+.btn-checkout:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-wa-checkout {
+  width: 100%; padding: 14px;
+  background: #25D366; color: white;
+  border-radius: 50px; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 12px; transition: opacity 0.2s;
+}
+.btn-wa-checkout:hover { opacity: 0.88; }
+
+.stripe-logos {
+  display: flex; justify-content: center; gap: 6px;
+  margin-top: 16px; opacity: 0.4;
+  font-size: 11px; color: var(--gris);
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHECKOUT MODAL (Stripe)
+═══════════════════════════════════════════════════════ */
+.checkout-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 3000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.checkout-overlay.open { opacity: 1; pointer-events: all; }
+
+.checkout-modal {
+  background: white; border-radius: 24px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  padding: 40px;
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+.checkout-overlay.open .checkout-modal { transform: translateY(0); }
+
+.checkout-header { margin-bottom: 28px; }
+.checkout-header h3 {
+  font-family: var(--font-heading);
+  font-size: 24px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--negro); margin-bottom: 6px;
+}
+.checkout-header p { font-size: 14px; color: var(--gris); }
+
+.checkout-summary {
+  background: var(--arena); border-radius: 16px;
+  padding: 20px; margin-bottom: 28px;
+}
+.checkout-summary-item {
+  display: flex; justify-content: space-between;
+  font-size: 14px; margin-bottom: 8px;
+  color: var(--negro);
+}
+.checkout-summary-item:last-child {
+  margin-bottom: 0; padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-weight: 700; font-size: 16px;
+}
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--negro); margin-bottom: 6px;
+}
+.form-input {
+  width: 100%; padding: 12px 16px;
+  border: 1.5px solid #E5E7EB; border-radius: 10px;
+  font-size: 15px; font-family: var(--font-body);
+  color: var(--negro);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.form-input:focus {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(30,109,181,0.12);
+}
+
+#stripe-card-element {
+  padding: 13px 16px;
+  border: 1.5px solid #E5E7EB; border-radius: 10px;
+  background: white;
+  transition: border-color 0.2s;
+}
+#stripe-card-element.StripeElement--focus {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(30,109,181,0.12);
+}
+#stripe-card-element.StripeElement--invalid { border-color: #EF4444; }
+
+#card-errors {
+  color: #EF4444; font-size: 13px; margin-top: 6px;
+  min-height: 18px;
+}
+
+.checkout-footer-btns {
+  display: flex; gap: 12px; margin-top: 28px;
+}
+.btn-pay {
+  flex: 1; padding: 16px;
+  background: var(--azul); color: white;
+  border-radius: 50px; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.2s;
+}
+.btn-pay:hover { background: var(--azul-dark); }
+.btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-cancel-checkout {
+  padding: 16px 24px;
+  background: var(--gris-light); color: var(--gris);
+  border-radius: 50px; font-size: 15px; font-weight: 600;
+  transition: background 0.2s;
+}
+.btn-cancel-checkout:hover { background: #E5E7EB; }
+
+.secure-badge {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; margin-top: 16px;
+  font-size: 12px; color: var(--gris);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SUCCESS MODAL
+═══════════════════════════════════════════════════════ */
+.success-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 4000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.success-overlay.open { opacity: 1; pointer-events: all; }
+.success-modal {
+  background: white; border-radius: 24px;
+  width: 100%; max-width: 440px;
+  padding: 48px 40px; text-align: center;
+  box-shadow: var(--shadow-xl);
+}
+.success-icon { font-size: 72px; margin-bottom: 20px; }
+.success-modal h3 {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 700; margin-bottom: 12px;
+}
+.success-modal p { font-size: 15px; color: var(--gris); line-height: 1.7; margin-bottom: 28px; }
+.btn-success-close {
+  background: var(--azul); color: white;
+  padding: 14px 36px; border-radius: 50px;
+  font-size: 15px; font-weight: 700;
+  transition: background 0.2s;
+}
+.btn-success-close:hover { background: var(--azul-dark); }
+
+/* ═══════════════════════════════════════════════════════
+   WA FLOAT
+═══════════════════════════════════════════════════════ */
+.wa-float {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1500;
+  background: #25D366; color: white;
+  width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.wa-float:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,0.5); }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMACIONES
+═══════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ═══════════════════════════════════════════════════════
+   VER MÁS MODAL — SHEKINAH
+═══════════════════════════════════════════════════════ */
+.vermas-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 3500; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(6px);
+}
+.vermas-overlay.open { opacity: 1; pointer-events: all; }
+
+.vermas-modal {
+  background: white; border-radius: 28px;
+  width: 100%; max-width: 780px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(24px) scale(0.98);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.vermas-overlay.open .vermas-modal { transform: translateY(0) scale(1); }
+
+/* hero image area */
+.vermas-hero {
+  height: 280px;
+  background: linear-gradient(180deg, #006B7A 0%, #00BCD4 55%, #4EDFE8 100%);
+  border-radius: 28px 28px 0 0;
+  position: relative; overflow: hidden;
+  display: flex; align-items: flex-end; padding: 28px 32px;
+}
+.vermas-hero-icon {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 140px; opacity: 0.18;
+  pointer-events: none;
+}
+.vermas-hero-content { position: relative; z-index: 2; }
+.vermas-hero-tag {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white; border-radius: 50px;
+  padding: 5px 16px; font-size: 12px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 10px; display: inline-block;
+}
+.vermas-hero h2 {
+  font-family: var(--font-display);
+  font-size: 38px; font-weight: 900; color: white; line-height: 1;
+}
+.vermas-close {
+  position: absolute; top: 20px; right: 20px; z-index: 10;
+  background: rgba(0,0,0,0.3); backdrop-filter: blur(6px);
+  border-radius: 50%; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px; line-height: 1;
+  transition: background 0.2s;
+}
+.vermas-close:hover { background: rgba(0,0,0,0.55); }
+
+.vermas-body { padding: 36px 36px 40px; }
+
+/* mini gallery */
+.vermas-gallery {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  margin-bottom: 32px;
+}
+.vermas-gallery-item {
+  border-radius: 12px; overflow: hidden;
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  transition: transform 0.25s;
+}
+.vermas-gallery-item:hover { transform: scale(1.04); }
+.g1 { background: linear-gradient(135deg,#006B7A,#00BCD4); }
+.g2 { background: linear-gradient(135deg,#00838F,#26C6DA); }
+.g3 { background: linear-gradient(135deg,#00796B,#26A69A); }
+.g4 { background: linear-gradient(135deg,#0277BD,#29B6F6); }
+
+/* two col info */
+.vermas-cols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  margin-bottom: 28px;
+}
+@media(max-width:540px){ .vermas-cols { grid-template-columns: 1fr; } }
+
+.vermas-info-box {
+  background: var(--arena); border-radius: 16px; padding: 22px;
+}
+.vermas-info-label {
+  font-family: var(--font-heading);
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gris); font-weight: 700; margin-bottom: 12px;
+}
+.vermas-info-row {
+  display: flex; justify-content: space-between;
+  font-size: 14px; padding: 7px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  color: var(--negro);
+}
+.vermas-info-row:last-child { border-bottom: none; }
+.vermas-info-row span:last-child { font-weight: 600; color: var(--azul); }
+
+/* incluye / no incluye */
+.vermas-includes {
+  margin-bottom: 28px;
+}
+.vermas-includes-title {
+  font-family: var(--font-heading);
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gris); font-weight: 700; margin-bottom: 12px;
+}
+.vermas-includes-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.vermas-include-item {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 13px; color: var(--negro); font-weight: 500;
+  padding: 10px 14px;
+  background: var(--gris-light); border-radius: 10px;
+}
+.vermas-include-item .inc-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: var(--shekinah-color);
+}
+
+/* mapa placeholder */
+.vermas-map {
+  background: linear-gradient(135deg, #E3F2FD 0%, #B3E5FC 100%);
+  border-radius: 16px; height: 160px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 28px;
+  border: 1px solid #B3E5FC;
+  cursor: pointer; transition: opacity 0.2s;
+  text-decoration: none;
+}
+.vermas-map:hover { opacity: 0.85; }
+.vermas-map-icon { font-size: 36px; }
+.vermas-map-text { font-size: 14px; font-weight: 600; color: var(--azul); }
+.vermas-map-sub { font-size: 12px; color: var(--gris); }
+
+/* politicas */
+.vermas-politicas {
+  background: #FFF8E1; border-radius: 14px;
+  padding: 18px 20px; margin-bottom: 28px;
+  border: 1px solid #FFE082;
+}
+.vermas-politicas-title {
+  font-size: 12px; font-weight: 700; color: #E65100;
+  text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;
+}
+.vermas-politicas ul {
+  list-style: none; display: flex; flex-direction: column; gap: 6px;
+}
+.vermas-politicas li {
+  font-size: 13px; color: #5D4037;
+  display: flex; align-items: flex-start; gap: 7px;
+}
+.vermas-politicas li::before { content: '⚠'; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+
+/* CTA bottom */
+.vermas-cta {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.vermas-price-block { flex: 1; }
+.vermas-price-adulto {
+  font-family: var(--font-heading);
+  font-size: 11px; color: var(--gris); letter-spacing: 2px; text-transform: uppercase;
+}
+.vermas-price-adulto strong { font-size: 32px; color: var(--negro); display: block; line-height: 1.1; }
+.vermas-price-child {
+  font-size: 12px; color: var(--verde); font-weight: 600;
+  display: flex; align-items: center; gap: 4px; margin-top: 2px;
+}
+.vermas-price-child::before { content: '👦'; font-size: 11px; }
+
+.toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--negro); color: white;
+  padding: 14px 28px; border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  z-index: 5000; opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">ML</div>
+    <div class="nav-logo-text"><span>MAZA</span><span>LIFE</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#venues">Experiencias</a></li>
+    <li><a href="#combos">Paquetes</a></li>
+    <li><a href="#opiniones">Opiniones</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="https://wa.me/526691234567" target="_blank" class="btn-wa-nav">
+      💬 WhatsApp
+    </a>
+    <button class="btn-carrito" onclick="toggleCart()">
+      🛒 Mi plan
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="inicio">
+  <div class="hero-tag">Mazatlán · Tourism & Entertainment</div>
+  <h1>Vive<br>Mazatlán<br><em>de verdad.</em></h1>
+  <p class="hero-sub">Cinco experiencias únicas para que tu viaje sea <br>más que playa y malecón. Reserva hoy, vive mañana.</p>
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="document.getElementById('venues').scrollIntoView({behavior:'smooth'})">
+      Ver experiencias →
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('combos').scrollIntoView({behavior:'smooth'})">
+      Ver paquetes
+    </button>
+  </div>
+  <div class="hero-venues">
+    <div class="venue-pill" onclick="scrollTo('shekinah')">Shekinah Beach Club</div>
+    <div class="venue-pill" onclick="scrollTo('farolesa')">Farolesa del Faro</div>
+    <div class="venue-pill" onclick="scrollTo('observatorio')">Observatorio 1873</div>
+    <div class="venue-pill" onclick="scrollTo('munba')">Munba</div>
+    <div class="venue-pill" onclick="scrollTo('mansion')">Mansión Pirata</div>
+  </div>
+</section>
+
+<!-- ═══ STRIP ═══ -->
+<div class="strip">
+  <div class="strip-item"><span>☀</span> Beach Club premium</div>
+  <div class="strip-item"><span>🦅</span> Tirolesa del Faro</div>
+  <div class="strip-item"><span>🔭</span> Observatorio 1873</div>
+  <div class="strip-item"><span>🐋</span> Museo Ballena</div>
+  <div class="strip-item"><span>💀</span> Mansión Pirata</div>
+  <div class="strip-item"><span>✅</span> Reserva en línea</div>
+  <div class="strip-item"><span>🔒</span> Pago seguro Stripe</div>
+  <div class="strip-item"><span>📍</span> Mazatlán, Sinaloa</div>
+</div>
+
+<!-- ═══ INTRO ═══ -->
+<section style="background:white">
+  <div class="intro reveal">
+    <div>
+      <div class="intro-label">¿Por qué Mazalife?</div>
+      <h2>El Mazatlán que no<br>encuentras en <em>TripAdvisor</em></h2>
+      <p>Mazalife reúne las experiencias más auténticas y emocionantes de la ciudad. Desde adrenalina pura hasta historia y naturaleza, todo pensado para que tu familia regrese queriendo más.</p>
+      <p>Reserva todo en un solo lugar, paga de forma segura y recibe confirmación inmediata. Sin colas, sin incertidumbre.</p>
+      <div class="intro-stats">
+        <div class="stat-box">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Experiencias únicas en Mazatlán</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">+25K</div>
+          <div class="stat-label">Visitantes felices cada año</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">4.8★</div>
+          <div class="stat-label">Calificación promedio</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Pago seguro garantizado</div>
+        </div>
+      </div>
+    </div>
+    <div class="intro-visual">
+      <div class="intro-img-main">
+        <div class="img-placeholder-text">Mazatlán<br>desde el aire</div>
+      </div>
+      <div class="intro-img-float">
+        <div class="float-icon">🌊</div>
+        <div class="float-text">
+          <strong>Temporada alta</strong>
+          <span>Dic – Abr · Alta demanda</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SECTION HEADER VENUES ═══ -->
+<div class="section-header reveal" id="venues">
+  <div class="label" style="color:var(--azul)">Las 5 experiencias</div>
+  <h2>Elige las tuyas.<br>Combínalas. Vívelas.</h2>
+  <p>Agrega al carrito las experiencias que quieres y reserva todo en un solo pago. Tu confirmación llega en segundos.</p>
+</div>
+
+<!-- ═══ VENUES ═══ -->
+<section class="venues-section">
+
+  <!-- SHEKINAH -->
+  <div class="venue-block venue-shekinah-wrap reveal" id="shekinah">
+    <div class="venue-inner">
+      <div class="venue-img venue-shekinah">
+        <div class="venue-img-icon">🏖</div>
+        <div class="venue-img-badge">Beach Club · Acceso todo el día</div>
+      </div>
+      <div class="venue-content">
+        <div class="venue-tag" style="background:rgba(0,188,212,0.1);color:var(--shekinah-color)">
+          🌊 Beach Club
+        </div>
+        <h2 class="venue-name">Shekinah<br>Beach Club</h2>
+        <p class="venue-desc">El beach club más exclusivo del Pacífico mexicano. Acceso directo a la playa, alberca infinity, servicio de mesa, música en vivo los fines de semana y el atardecer más fotografiado de Mazatlán.</p>
+        <ul class="venue-highlights">
+          <li>Acceso a playa privada y alberca infinity</li>
+          <li>Incluye consumo mínimo en alimentos y bebidas</li>
+          <li>Tumbonas y sombrillas reservadas</li>
+          <li>Vista panorámica al Océano Pacífico</li>
+        </ul>
+        <div class="venue-actions">
+          <div class="venue-price">
+            Desde
+            <strong>$400</strong>
+            <small>MXN / adulto</small>
+            <div class="venue-price-nino">Niño (3–12 años) $300 MXN</div>
+          </div>
+          <button class="btn-add" id="add-shekinah"
+            onclick="addToCart('shekinah','Shekinah Beach Club','🏖',400,'venue-shekinah')">
+            + Agregar al plan
+          </button>
+          <button class="btn-info" onclick="openVerMas()">Ver más ↗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAROLESA -->
+  <div class="venue-block venue-farolesa-wrap reveal" id="farolesa">
+    <div class="venue-inner">
+      <div class="venue-img venue-farolesa">
+        <div class="venue-img-icon">🦅</div>
+        <div class="venue-img-badge">Tirolesa · Adrenalina pura</div>
+      </div>
+      <div class="venue-content">
+        <div class="venue-tag" style="background:rgba(76,175,80,0.1);color:var(--farolesa-color)">
+          🦅 Aventura extrema
+        </div>
+        <h2 class="venue-name">Farolesa<br>del Faro</h2>
+        <p class="venue-desc">La tirolesa del Faro de Mazatlán — uno de los faros naturales más altos del mundo. Vuela sobre el océano con vistas incomparables a la ciudad y el Puerto de Mazatlán. Una experiencia que no olvidarás.</p>
+        <ul class="venue-highlights">
+          <li>Tirolesa desde el segundo faro natural más alto del mundo</li>
+          <li>Vista 360° a Mazatlán, el océano y las islas</li>
+          <li>Guías certificados y equipo de seguridad profesional</li>
+          <li>Duración del vuelo: 45–60 segundos de adrenalina</li>
+        </ul>
+        <div class="venue-actions">
+          <div class="venue-price">
+            Desde
+            <strong>$600</strong>
+            <small>MXN / adulto</small>
+            <div class="venue-price-nino">Niño (6–12 años) $450 MXN</div>
+          </div>
+          <button class="btn-add" id="add-farolesa"
+            onclick="addToCart('farolesa','Farolesa del Faro','🦅',600,'venue-farolesa')">
+            + Agregar al plan
+          </button>
+          <button class="btn-info">Ver más</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVATORIO -->
+  <div class="venue-block venue-observatorio-wrap reveal" id="observatorio">
+    <div class="venue-inner">
+      <div class="venue-img venue-observatorio">
+        <div class="venue-img-icon">🔭</div>
+        <div class="venue-img-badge">Historia · Desde 1873</div>
+      </div>
+      <div class="venue-content">
+        <div class="venue-tag" style="background:rgba(245,166,35,0.1);color:var(--observatorio-color)">
+          🔭 Cultura e historia
+        </div>
+        <h2 class="venue-name">Observatorio<br>1873</h2>
+        <p class="venue-desc">El observatorio meteorológico más antiguo del Pacífico mexicano, restaurado y convertido en una experiencia cultural única. Conoce la historia de Mazatlán desde las alturas y observa las estrellas con telescopios de época.</p>
+        <ul class="venue-highlights">
+          <li>Recorrido guiado por el observatorio histórico restaurado</li>
+          <li>Exposición de astronomía y meteorología del siglo XIX</li>
+          <li>Sesión de observación estelar (sesiones nocturnas)</li>
+          <li>Galería fotográfica del Mazatlán histórico</li>
+        </ul>
+        <div class="venue-actions">
+          <div class="venue-price">
+            Desde
+            <strong>$500</strong>
+            <small>MXN / adulto</small>
+            <div class="venue-price-nino">Niño (3–12 años) $375 MXN</div>
+          </div>
+          <button class="btn-add" id="add-observatorio"
+            onclick="addToCart('observatorio','Observatorio 1873','🔭',500,'venue-observatorio')">
+            + Agregar al plan
+          </button>
+          <button class="btn-info">Ver más</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUNBA -->
+  <div class="venue-block venue-munba-wrap reveal" id="munba">
+    <div class="venue-inner">
+      <div class="venue-img venue-munba">
+        <div class="venue-img-icon">🐋</div>
+        <div class="venue-img-badge">Naturaleza · Ballenas jorobadas</div>
+      </div>
+      <div class="venue-content">
+        <div class="venue-tag" style="background:rgba(30,109,181,0.1);color:var(--munba-color)">
+          🐋 Naturaleza marina
+        </div>
+        <h2 class="venue-name">Munba + <br>Munba Expeditions</h2>
+        <p class="venue-desc">El único museo de ballenas del Pacífico mexicano, con la experiencia de avistamiento de ballenas jorobadas más emocionante de la costa. Combina la exhibición educativa con una expedición real al mar.</p>
+        <ul class="venue-highlights">
+          <li>Museo interactivo dedicado a las ballenas jorobadas</li>
+          <li>Expedición marítima de avistamiento (temp. Nov–Mar)</li>
+          <li>Guías biólogos especializados en cetáceos</li>
+          <li>Ideal para niños: talleres educativos incluidos</li>
+        </ul>
+        <div class="venue-actions">
+          <div class="venue-price">
+            Desde
+            <strong>$350</strong>
+            <small>MXN / adulto</small>
+            <div class="venue-price-nino">Niño (3–12 años) $265 MXN</div>
+          </div>
+          <button class="btn-add" id="add-munba"
+            onclick="addToCart('munba','Munba + Expeditions','🐋',350,'venue-munba')">
+            + Agregar al plan
+          </button>
+          <button class="btn-info">Ver más</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANSIÓN PIRATA -->
+  <div class="venue-block venue-mansion-wrap reveal" id="mansion">
+    <div class="venue-inner">
+      <div class="venue-img venue-mansion">
+        <div class="venue-img-icon">💀</div>
+        <div class="venue-img-badge">Aventura · Escape room viviente</div>
+      </div>
+      <div class="venue-content">
+        <div class="venue-tag" style="background:rgba(233,30,140,0.1);color:var(--mansion-color)">
+          💀 Entretenimiento
+        </div>
+        <h2 class="venue-name">Mansión<br>Pirata</h2>
+        <p class="venue-desc">Una experiencia inmersiva donde te conviertes en el protagonista. Recorre la mansión más misteriosa del Puerto y descifra los secretos piratas que llevan siglos ocultos. Terror, aventura y diversión para toda la familia.</p>
+        <ul class="venue-highlights">
+          <li>Recorrido teatral inmersivo con actores en vivo</li>
+          <li>Historia original de los piratas del Pacífico</li>
+          <li>Experiencia apta para todas las edades (mayores de 8 años)</li>
+          <li>Duración: 60–90 minutos de aventura</li>
+        </ul>
+        <div class="venue-actions">
+          <div class="venue-price">
+            Desde
+            <strong>$350</strong>
+            <small>MXN / adulto</small>
+            <div class="venue-price-nino">Niño (8–12 años) $265 MXN</div>
+          </div>
+          <button class="btn-add" id="add-mansion"
+            onclick="addToCart('mansion','Mansión Pirata','💀',350,'venue-mansion')">
+            + Agregar al plan
+          </button>
+          <button class="btn-info">Ver más</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ COMBOS ═══ -->
+<section class="combos-section" id="combos">
+  <div class="combos-inner">
+    <div class="section-header reveal" style="padding-top:0">
+      <div class="label" style="color:var(--naranja)">Paquetes especiales</div>
+      <h2>Más experiencias,<br>mejor precio</h2>
+      <p>Combina venues y ahorra. Paquetes armados para cada tipo de viajero.</p>
+    </div>
+    <div class="combos-grid reveal">
+
+      <div class="combo-card">
+        <div class="combo-icon">🌊</div>
+        <div class="combo-name">Plan Relax</div>
+        <div class="combo-desc">Para quienes quieren sol, mar y buena vibra. El plan perfecto para parejas y grupos de amigos.</div>
+        <ul class="combo-includes">
+          <li><span class="dot"></span>Shekinah Beach Club</li>
+          <li><span class="dot"></span>Munba (museo)</li>
+        </ul>
+        <div class="combo-price-row">
+          <div class="combo-price-old">$750 MXN</div>
+          <div class="combo-price-new">$680 <small>/ persona</small></div>
+          <div class="combo-save">-9%</div>
+        </div>
+        <button class="btn-combo" onclick="addComboToCart('relax')">Agregar plan →</button>
+      </div>
+
+      <div class="combo-card featured">
+        <div class="combo-featured-badge">⭐ MÁS POPULAR</div>
+        <div class="combo-icon">🦅</div>
+        <div class="combo-name">Plan Aventura Total</div>
+        <div class="combo-desc">La experiencia completa de Mazatlán. Adrenalina, playa, historia y naturaleza en un solo paquete.</div>
+        <ul class="combo-includes">
+          <li><span class="dot" style="background:var(--naranja)"></span>Shekinah Beach Club</li>
+          <li><span class="dot" style="background:var(--naranja)"></span>Farolesa del Faro</li>
+          <li><span class="dot" style="background:var(--naranja)"></span>Observatorio 1873</li>
+          <li><span class="dot" style="background:var(--naranja)"></span>Munba + Expeditions</li>
+        </ul>
+        <div class="combo-price-row">
+          <div class="combo-price-old">$1,850 MXN</div>
+          <div class="combo-price-new">$1,550 <small>/ persona</small></div>
+          <div class="combo-save">-16%</div>
+        </div>
+        <button class="btn-combo" onclick="addComboToCart('aventura')">Agregar plan →</button>
+      </div>
+
+      <div class="combo-card">
+        <div class="combo-icon">👨‍👩‍👧‍👦</div>
+        <div class="combo-name">Plan Familia</div>
+        <div class="combo-desc">Diseñado para que niños y adultos disfruten por igual. Historia, misterio y naturaleza marina.</div>
+        <ul class="combo-includes">
+          <li><span class="dot"></span>Observatorio 1873</li>
+          <li><span class="dot"></span>Munba + Expeditions</li>
+          <li><span class="dot"></span>Mansión Pirata</li>
+        </ul>
+        <div class="combo-price-row">
+          <div class="combo-price-old">$1,200 MXN</div>
+          <div class="combo-price-new">$1,050 <small>/ persona</small></div>
+          <div class="combo-save">-12%</div>
+        </div>
+        <button class="btn-combo" onclick="addComboToCart('familia')">Agregar plan →</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIOS ═══ -->
+<section class="testimonios-section" id="opiniones">
+  <div class="section-header reveal" style="padding-top:0">
+    <div class="label" style="color:var(--azul)">Lo que dicen</div>
+    <h2>Viajeros que ya<br>vivieron Mazalife</h2>
+  </div>
+  <div class="testimonios-grid reveal">
+    <div class="testimonio-card">
+      <div class="testimonio-stars">★★★★★</div>
+      <div class="testimonio-text">"La Farolesa del Faro fue lo más emocionante que hice en mis vacaciones. La vista es increíble y el equipo de seguridad te hace sentir muy seguro. ¡Mis hijos no querían bajar!"</div>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar" style="background:var(--azul)">A</div>
+        <div>
+          <div class="testimonio-name">Alejandro R.</div>
+          <div class="testimonio-city">Monterrey, NL</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonio-card">
+      <div class="testimonio-stars">★★★★★</div>
+      <div class="testimonio-text">"Shekinah es otro nivel. Fuimos en el puente de Semana Santa y reservamos por la web — súper fácil. Llegamos y ya teníamos todo listo. El atardecer desde la alberca es impresionante."</div>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar" style="background:var(--rosa)">V</div>
+        <div>
+          <div class="testimonio-name">Valeria M.</div>
+          <div class="testimonio-city">Ciudad de México</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonio-card">
+      <div class="testimonio-stars">★★★★★</div>
+      <div class="testimonio-text">"El Observatorio 1873 nos sorprendió muchísimo. No esperábamos tan buen contenido. La guía sabía todo sobre la historia de Mazatlán. Definitivamente lo recomendaría a cualquiera que visite la ciudad."</div>
+      <div class="testimonio-author">
+        <div class="testimonio-avatar" style="background:var(--verde)">C</div>
+        <div>
+          <div class="testimonio-name">Carlos T.</div>
+          <div class="testimonio-city">Torreón, Coahuila</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA FINAL ═══ -->
+<section class="cta-final" id="contacto">
+  <h2>Mazatlán te espera.<br><em>¿Estás listo?</em></h2>
+  <p>Reserva hoy y asegura tu lugar. Confirmación inmediata, pago 100% seguro, cancelación flexible.</p>
+  <div class="cta-btns">
+    <button class="btn-primary" onclick="document.getElementById('venues').scrollIntoView({behavior:'smooth'})">
+      Reservar ahora →
+    </button>
+    <a href="https://wa.me/526691234567" target="_blank" class="btn-secondary">
+      💬 Hablar con nosotros
+    </a>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name"><span>MAZA</span><span>LIFE</span></div>
+      <div class="footer-brand-sub">Tourism & Entertainment</div>
+      <div class="footer-brand-desc">Las experiencias más auténticas de Mazatlán reunidas en un solo lugar. Grupo Petroil · Mazatlán, Sinaloa.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Experiencias</div>
+      <ul class="footer-links">
+        <li><a href="#shekinah">Shekinah Beach Club</a></li>
+        <li><a href="#farolesa">Farolesa del Faro</a></li>
+        <li><a href="#observatorio">Observatorio 1873</a></li>
+        <li><a href="#munba">Munba</a></li>
+        <li><a href="#mansion">Mansión Pirata</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Paquetes</div>
+      <ul class="footer-links">
+        <li><a href="#combos">Plan Relax</a></li>
+        <li><a href="#combos">Plan Aventura Total</a></li>
+        <li><a href="#combos">Plan Familia</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Contacto</div>
+      <ul class="footer-links">
+        <li><a href="https://wa.me/526691234567">WhatsApp</a></li>
+        <li><a href="mailto:hola@mazalife.com.mx">hola@mazalife.com.mx</a></li>
+        <li><a href="#">Mazatlán, Sinaloa</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Mazalife · Grupo Petroil · Mazatlán, Sinaloa</p>
+    <p><a href="#">Aviso de privacidad</a> · <a href="#">Términos y condiciones</a></p>
+    <p>Powered by <a href="https://proyecta.com.mx">Proyecta</a></p>
+  </div>
+</footer>
+
+<!-- ═══ VER MÁS MODAL — SHEKINAH ═══ -->
+<div class="vermas-overlay" id="vermasOverlay">
+  <div class="vermas-modal">
+    <div class="vermas-hero">
+      <div class="vermas-hero-icon">🏖</div>
+      <button class="vermas-close" onclick="closeVerMas()">×</button>
+      <div class="vermas-hero-content">
+        <div class="vermas-hero-tag">🌊 Beach Club · Mazatlán</div>
+        <h2>Shekinah<br>Beach Club</h2>
+      </div>
+    </div>
+    <div class="vermas-body">
+
+      <!-- Galería ambiente -->
+      <div class="vermas-includes-title" style="margin-bottom:12px">Galería</div>
+      <div class="vermas-gallery">
+        <div class="vermas-gallery-item g1">🌅</div>
+        <div class="vermas-gallery-item g2">🏊</div>
+        <div class="vermas-gallery-item g3">🍹</div>
+        <div class="vermas-gallery-item g4">🌊</div>
+      </div>
+
+      <!-- Horarios y precios -->
+      <div class="vermas-cols">
+        <div class="vermas-info-box">
+          <div class="vermas-info-label">⏰ Horarios</div>
+          <div class="vermas-info-row"><span>Lunes – Viernes</span><span>10am – 7pm</span></div>
+          <div class="vermas-info-row"><span>Sábado</span><span>9am – 8pm</span></div>
+          <div class="vermas-info-row"><span>Domingo</span><span>9am – 7pm</span></div>
+          <div class="vermas-info-row"><span>Último acceso</span><span>1hr antes cierre</span></div>
+        </div>
+        <div class="vermas-info-box">
+          <div class="vermas-info-label">🎟 Tarifas</div>
+          <div class="vermas-info-row"><span>Adulto</span><span>$400 MXN</span></div>
+          <div class="vermas-info-row"><span>Niño (3–12 años)</span><span>$300 MXN</span></div>
+          <div class="vermas-info-row"><span>Menor de 3 años</span><span>Gratis</span></div>
+          <div class="vermas-info-row"><span>Consumo mínimo</span><span>Incluido</span></div>
+        </div>
+      </div>
+
+      <!-- Qué incluye -->
+      <div class="vermas-includes">
+        <div class="vermas-includes-title">✅ Qué incluye tu entrada</div>
+        <div class="vermas-includes-grid">
+          <div class="vermas-include-item"><div class="inc-dot"></div>Acceso a alberca infinity</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Playa privada con servicio</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Tumbona + sombrilla reservada</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Consumo mínimo en A&B</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Casilleros y vestidores</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Estacionamiento incluido</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Música en vivo (fin de semana)</div>
+          <div class="vermas-include-item"><div class="inc-dot"></div>Vista panorámica al Pacífico</div>
+        </div>
+      </div>
+
+      <!-- Mapa -->
+      <a href="https://maps.google.com/?q=Shekinah+Beach+Club+Mazatlan" target="_blank" class="vermas-map">
+        <div class="vermas-map-icon">📍</div>
+        <div class="vermas-map-text">Shekinah Beach Club</div>
+        <div class="vermas-map-sub">Ver en Google Maps · Zona Dorada, Mazatlán</div>
+      </a>
+
+      <!-- Políticas -->
+      <div class="vermas-politicas">
+        <div class="vermas-politicas-title">Políticas importantes</div>
+        <ul>
+          <li>Reservación en línea asegura lugar — especialmente en temporada alta y fines de semana.</li>
+          <li>Se requiere presentar confirmación (email o pantalla) al ingreso.</li>
+          <li>No se permiten alimentos o bebidas externas.</li>
+          <li>Menores de edad deben ingresar acompañados de un adulto responsable.</li>
+          <li>Cancelación gratuita hasta 48 horas antes de la fecha reservada.</li>
+        </ul>
+      </div>
+
+      <!-- CTA final en modal -->
+      <div class="vermas-cta">
+        <div class="vermas-price-block">
+          <div class="vermas-price-adulto">Desde <strong>$400 MXN</strong></div>
+          <div class="vermas-price-child">Niño (3–12 años) $300 MXN</div>
+        </div>
+        <button class="btn-add" onclick="addToCart('shekinah','Shekinah Beach Club','🏖',400,'venue-shekinah'); closeVerMas();">
+          + Agregar al plan
+        </button>
+        <button class="btn-cancel-checkout" style="padding:14px 20px" onclick="closeVerMas()">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WA FLOAT ═══ -->
+<a href="https://wa.me/526691234567?text=Hola%2C%20quiero%20informes%20sobre%20Mazalife" target="_blank" class="wa-float">💬</a>
+
+<!-- ═══ CARRITO DRAWER ═══ -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-title">🗺 Mi Plan</div>
+    <button class="cart-close" onclick="toggleCart()">×</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <div class="cart-empty-icon">🗺</div>
+      <h3>Tu plan está vacío</h3>
+      <p>Agrega experiencias para armar tu itinerario perfecto en Mazatlán.</p>
+    </div>
+    <div id="cartItems"></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <div class="cart-subtotal-label">Total a pagar</div>
+      <div class="cart-subtotal-val" id="cartTotal">$0 MXN</div>
+    </div>
+    <div class="cart-note">Precios por persona · Incluye impuestos</div>
+    <button class="btn-checkout" onclick="openCheckout()">
+      🔒 Reservar y pagar
+    </button>
+    <a href="#" onclick="buildWhatsAppMessage()" class="btn-wa-checkout">
+      💬 Reservar por WhatsApp
+    </a>
+    <div class="stripe-logos">🔒 Pago seguro · Stripe · Visa · MC · AMEX</div>
+  </div>
+</div>
+
+<!-- ═══ CHECKOUT MODAL ═══ -->
+<div class="checkout-overlay" id="checkoutOverlay">
+  <div class="checkout-modal">
+    <div class="checkout-header">
+      <h3>🔒 Reservar experiencias</h3>
+      <p>Pago seguro · Confirmación inmediata</p>
+    </div>
+    <div class="checkout-summary" id="checkoutSummary"></div>
+    <div class="form-group">
+      <label class="form-label">Nombre completo</label>
+      <input type="text" class="form-input" id="clientName" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="clientEmail" placeholder="tu@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">WhatsApp (para confirmación)</label>
+      <input type="tel" class="form-input" id="clientPhone" placeholder="+52 669 000 0000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Datos de tarjeta</label>
+      <div id="stripe-card-element"></div>
+      <div id="card-errors"></div>
+    </div>
+    <div class="checkout-footer-btns">
+      <button class="btn-cancel-checkout" onclick="closeCheckout()">Cancelar</button>
+      <button class="btn-pay" id="btnPay" onclick="processPayment()">
+        🔒 Pagar ahora
+      </button>
+    </div>
+    <div class="secure-badge">🔒 Procesado por Stripe · 256-bit SSL</div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS MODAL ═══ -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-modal">
+    <div class="success-icon">🎉</div>
+    <h3>¡Reserva confirmada!</h3>
+    <p>Hemos enviado la confirmación a tu correo y WhatsApp. Te esperamos en Mazatlán. ¡Va a ser increíble!</p>
+    <button class="btn-success-close" onclick="closeSuccess()">¡Perfecto, gracias!</button>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STRIPE SETUP
+// ═══════════════════════════════════════════════════════
+// ⚠️ Reemplazar con tu Stripe Publishable Key real
+const STRIPE_PK = 'pk_test_REEMPLAZA_CON_TU_KEY_REAL';
+let stripe, stripeCardElement;
+
+function initStripe() {
+  try {
+    stripe = Stripe(STRIPE_PK);
+    const elements = stripe.elements({
+      fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans' }]
+    });
+    stripeCardElement = elements.create('card', {
+      style: {
+        base: {
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          fontSize: '15px',
+          color: '#111827',
+          '::placeholder': { color: '#9CA3AF' }
+        },
+        invalid: { color: '#EF4444' }
+      }
+    });
+    stripeCardElement.mount('#stripe-card-element');
+    stripeCardElement.on('change', e => {
+      document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+    });
+  } catch(e) {
+    console.warn('Stripe no inicializado — modo demo');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CARRITO
+// ═══════════════════════════════════════════════════════
+let cart = {};
+
+const VENUE_DATA = {
+  shekinah:    { name: 'Shekinah Beach Club', icon: '🏖', price: 400, color: 'venue-shekinah' },
+  farolesa:    { name: 'Farolesa del Faro',   icon: '🦅', price: 600, color: 'venue-farolesa' },
+  observatorio:{ name: 'Observatorio 1873',   icon: '🔭', price: 500, color: 'venue-observatorio' },
+  munba:       { name: 'Munba + Expeditions', icon: '🐋', price: 350, color: 'venue-munba' },
+  mansion:     { name: 'Mansión Pirata',      icon: '💀', price: 350, color: 'venue-mansion' },
+};
+
+const VENUE_BG = {
+  'venue-shekinah':     'linear-gradient(135deg,#006B7A,#00BCD4)',
+  'venue-farolesa':     'linear-gradient(135deg,#1B5E20,#4CAF50)',
+  'venue-observatorio': 'linear-gradient(135deg,#E65100,#F5A623)',
+  'venue-munba':        'linear-gradient(135deg,#0D3D6B,#1E6DB5)',
+  'venue-mansion':      'linear-gradient(135deg,#880E4F,#E91E8C)',
+};
+
+function addToCart(id, name, icon, price, colorClass) {
+  if (cart[id]) {
+    cart[id].qty++;
+  } else {
+    cart[id] = { id, name, icon, price, colorClass, qty: 1 };
+  }
+  const btn = document.getElementById(`add-${id}`);
+  if (btn) {
+    btn.classList.add('added');
+    btn.textContent = '✓ Agregado';
+  }
+  updateCartUI();
+  showToast(`${icon} ${name} agregado al plan`);
+}
+
+function addComboToCart(combo) {
+  const combos = {
+    relax:    ['shekinah','munba'],
+    aventura: ['shekinah','farolesa','observatorio','munba'],
+    familia:  ['observatorio','munba','mansion'],
+  };
+  const items = combos[combo] || [];
+  items.forEach(id => {
+    const v = VENUE_DATA[id];
+    if (v) {
+      if (cart[id]) cart[id].qty++;
+      else cart[id] = { id, name: v.name, icon: v.icon, price: v.price, colorClass: v.color, qty: 1 };
+      const btn = document.getElementById(`add-${id}`);
+      if (btn) { btn.classList.add('added'); btn.textContent = '✓ Agregado'; }
+    }
+  });
+  updateCartUI();
+  showToast('🎒 Paquete agregado al plan');
+  toggleCart();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) {
+    delete cart[id];
+    const btn = document.getElementById(`add-${id}`);
+    if (btn) { btn.classList.remove('added'); btn.textContent = '+ Agregar al plan'; }
+  }
+  updateCartUI();
+}
+
+function getTotal() {
+  return Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+}
+
+function getCount() {
+  return Object.values(cart).reduce((s, i) => s + i.qty, 0);
+}
+
+function updateCartUI() {
+  const count = getCount();
+  const total = getTotal();
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = count;
+  badge.classList.toggle('show', count > 0);
+
+  const empty   = document.getElementById('cartEmpty');
+  const items   = document.getElementById('cartItems');
+  const footer  = document.getElementById('cartFooter');
+  const totalEl = document.getElementById('cartTotal');
+
+  const hasItems = count > 0;
+  empty.style.display  = hasItems ? 'none'  : 'block';
+  footer.style.display = hasItems ? 'block' : 'none';
+  totalEl.textContent  = `$${total.toLocaleString()} MXN`;
+
+  items.innerHTML = Object.values(cart).map(item => `
+    <div class="cart-item">
+      <div class="cart-item-color" style="background:${VENUE_BG[item.colorClass]}">${item.icon}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div style="font-size:12px;color:var(--gris)">$${item.price.toLocaleString()} MXN / persona</div>
+        <div class="cart-item-qty-row">
+          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="cart-item-price">$${(item.price*item.qty).toLocaleString()}</div>
+        <button class="cart-item-remove" onclick="changeQty('${item.id}',-${item.qty})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCart() {
+  document.getElementById('cartOverlay').classList.toggle('open');
+  document.getElementById('cartDrawer').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// CHECKOUT
+// ═══════════════════════════════════════════════════════
+function openCheckout() {
+  if (getCount() === 0) return;
+  if (!stripe) { initStripe(); }
+
+  // Build summary
+  const items = Object.values(cart);
+  let html = items.map(i =>
+    `<div class="checkout-summary-item"><span>${i.icon} ${i.name} × ${i.qty}</span><span>$${(i.price*i.qty).toLocaleString()} MXN</span></div>`
+  ).join('');
+  html += `<div class="checkout-summary-item"><span>Total</span><span>$${getTotal().toLocaleString()} MXN</span></div>`;
+  document.getElementById('checkoutSummary').innerHTML = html;
+
+  toggleCart();
+  document.getElementById('checkoutOverlay').classList.add('open');
+
+  // Mount stripe element after modal is visible
+  setTimeout(() => {
+    if (stripeCardElement) stripeCardElement.unmount();
+    initStripe();
+  }, 100);
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutOverlay').classList.remove('open');
+}
+
+async function processPayment() {
+  const name  = document.getElementById('clientName').value.trim();
+  const email = document.getElementById('clientEmail').value.trim();
+  const phone = document.getElementById('clientPhone').value.trim();
+
+  if (!name || !email) { showToast('⚠ Por favor completa tu nombre y email'); return; }
+
+  const btn = document.getElementById('btnPay');
+  btn.disabled = true;
+  btn.textContent = '⏳ Procesando...';
+
+  // ── DEMO MODE (sin backend real) ──────────────────────
+  // En producción: hacer POST a tu backend con los items,
+  // crear PaymentIntent en Stripe, confirmar con stripeCardElement.
+  //
+  // Flujo real:
+  // 1. POST /api/create-payment-intent  → { clientSecret }
+  // 2. stripe.confirmCardPayment(clientSecret, { payment_method: { card: stripeCardElement } })
+  // 3. Si result.paymentIntent.status === 'succeeded' → mostrar success
+  //
+  // Demo: simular procesamiento
+  await new Promise(r => setTimeout(r, 2000));
+
+  closeCheckout();
+  document.getElementById('successOverlay').classList.add('open');
+  cart = {};
+  updateCartUI();
+  btn.disabled = false;
+  btn.textContent = '🔒 Pagar ahora';
+}
+
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// VER MÁS MODAL — SHEKINAH
+// ═══════════════════════════════════════════════════════
+function openVerMas() {
+  document.getElementById('vermasOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeVerMas() {
+  document.getElementById('vermasOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('vermasOverlay')?.addEventListener('click', function(e) {
+  if (e.target === this) closeVerMas();
+});
+
+// ═══════════════════════════════════════════════════════
+// WHATSAPP FALLBACK
+// ═══════════════════════════════════════════════════════
+function buildWhatsAppMessage() {
+  const items = Object.values(cart);
+  if (!items.length) return;
+  let msg = 'Hola, me interesa reservar en Mazalife:%0A%0A';
+  items.forEach(i => { msg += `${i.icon} ${i.name} × ${i.qty} persona(s)%0A`; });
+  msg += `%0ATotal estimado: $${getTotal().toLocaleString()} MXN`;
+  window.open(`https://wa.me/526691234567?text=${msg}`, '_blank');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════════════
+// SCROLL HELPERS
+// ═══════════════════════════════════════════════════════
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Navbar shadow on scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Reveal on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Init Stripe on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initStripe, 500);
+});
+</script>
+</body>
+</html>
