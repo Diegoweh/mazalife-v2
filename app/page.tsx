@@ -177,11 +177,15 @@ export default function Home() {
     <>
       {/* ═══ NAVBAR ═══ */}
       <nav className={`fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-10 h-[72px] bg-white/95 backdrop-blur-md border-b border-black/[.06] transition-shadow duration-300 ${scrolled ? 'shadow-[0_4px_20px_rgba(0,0,0,0.10)]' : ''} max-sm:px-5`}>
-        <a href="#" className="flex items-center gap-2.5">
-          <div className="w-10 h-10 bg-azul rounded-[10px] flex items-center justify-center font-heading text-[18px] font-extrabold text-white tracking-[-1px]">ML</div>
-          <div className="font-heading text-[22px] font-extrabold tracking-widest">
-            <span className="text-azul">MAZA</span><span className="text-naranja">LIFE</span>
-          </div>
+        <a href="#" className="flex items-center">
+          <Image
+            src="/mazalife-navbar.png"
+            alt="Mazalife"
+            width={220}
+            height={48}
+            className="h-9 w-auto max-sm:h-8"
+            priority
+          />
         </a>
         <ul className="flex gap-8 list-none max-md:hidden">
           {[['#venues','Experiencias'],['#combos','Paquetes'],['#opiniones','Opiniones'],['#contacto','Contacto']].map(([href,label])=>(
@@ -353,9 +357,13 @@ export default function Home() {
       <footer className="bg-negro text-white/60 px-20 pt-16 pb-8 max-lg:px-6">
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-12 max-w-[1280px] mx-auto mb-12 max-lg:grid-cols-2 max-lg:gap-8">
           <div>
-            <div className="font-heading text-[26px] font-extrabold tracking-wide mb-3">
-              <span className="text-azul">MAZA</span><span className="text-naranja">LIFE</span>
-            </div>
+            <Image
+              src="/mazalife-footer.png"
+              alt="Mazalife"
+              width={220}
+              height={72}
+              className="h-auto w-[180px] max-w-full mb-4"
+            />
             <div className="text-xs uppercase tracking-[3px] mb-4">Tourism &amp; Entertainment</div>
             <div className="text-sm leading-[1.7] max-w-[280px]">Las experiencias más auténticas de Mazatlán reunidas en un solo lugar. Grupo Petroil · Mazatlán, Sinaloa.</div>
           </div>
